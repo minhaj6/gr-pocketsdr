@@ -1,0 +1,7 @@
+build/
+*.pyc
+__pycache__/
+*.pyo
+.cache/
+*.swp
+examples/pocketsdr_psd.py

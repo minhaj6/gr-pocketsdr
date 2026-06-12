@@ -1,0 +1,38 @@
+id: pocketsdr_pocketsdr_source
+label: PocketSDR Source
+category: '[pocketsdr]'
+flags: [python, throttle]
+
+templates:
+  imports: from gnuradio import pocketsdr
+  make: pocketsdr.pocketsdr_source(${conf_file}, ${channels})
+
+parameters:
+- id: conf_file
+  label: Config File
+  dtype: file_open
+  default: ''
+- id: channels
+  label: Channels
+  dtype: int_vector
+  default: '[1]'
+
+outputs:
+- label: out
+  dtype: complex
+  multiplicity: ${ len(channels) }
+
+documentation: |-
+  Signal source for the Pocket SDR FE 2CH/4CH/8CH GNSS RF frontend.
+
+  Config File: PocketSDR configuration file (pocket_conf format) written
+  to the device on start. Leave empty to keep the device's current
+  settings.
+
+  Channels: list of 1-based RF channel numbers, one complex output per
+  entry, e.g. [1] or [1, 2]. Output samples are at the 2-bit quantization
+  levels {+/-1, +/-3}; I-only channels output (I + 0j). All outputs are
+  demuxed from the same USB stream, so inter-channel sample alignment is
+  preserved.
+
+file_format: 1
