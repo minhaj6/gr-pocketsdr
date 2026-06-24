@@ -78,6 +78,18 @@ This was the primary motivation for building this project. Check out the example
 
 ![GNSS-SDR Screenshot](./docs/screenshot.png)
 
+The PocketSDR signal source has been merged with the `next` branch of [gnss-sdr](https://github.com/gnss-sdr/gnss-sdr/tree/next). The documentation to build gnss-sdr with the gr-pocketsdr support has been updated here - [Link](https://gnss-sdr.org/docs/sp-blocks/signal-source/#implementation-pocket_sdr_signal_source). 
+
+```
+git clone https://github.com/gnss-sdr/gnss-sdr
+cd gnss-sdr
+git checkout next
+mkdir build && cd build
+cmake -DCMAKE_PREFIX_PATH=<gr-pocketsdr install prefix> -DENABLE_POCKETSDR=ON ..
+make -j$(nproc)
+sudo make install
+```
+
 ## Tests
 
 `ctest` runs a bit-exact regression test: a captured raw FE 4CH USB stream
