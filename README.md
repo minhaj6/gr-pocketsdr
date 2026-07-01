@@ -4,6 +4,10 @@ GNU Radio out-of-tree (OOT) module for the
 [Pocket SDR](https://github.com/tomojitakasu/PocketSDR) FE 2CH/4CH/8CH
 open-source GNSS RF frontends (MAX2771 + Cypress EZ-USB FX2LP/FX3). The front-end used for this developed was DataGNSS PocketSDR FE 4CH ([link](https://www.datagnss.com/products/pocketsdr-gnss-receiver), not sponsored).
 
+> [!NOTE]
+> **New Update:** Changes has been merged with [GNSS-SDR](https://github.com/gnss-sdr/gnss-sdr) upstream (`next` branch). Jump here - [Use as a GNSS-SDR Signal Source](#use-as-a-gnss-sdr-signal-source)
+
+
 Provides a `PocketSDR Source` block that streams the FE's 2-bit IF samples over USB and outputs one `gr_complex` stream per selected RF channel.
 
 Developed and tested on Ubuntu 24.04 / GNU Radio 3.10.9. Tested in linux only (libusb-1.0).
