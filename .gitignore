@@ -4,3 +4,5 @@ __pycache__/
 *.pyo
 .cache/
 *.swp
+
+tmp-experiments/
