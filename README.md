@@ -53,6 +53,8 @@ then `sudo udevadm control --reload && sudo udevadm trigger`.
 `power/control=on` disables USB autosuspend, which can otherwise interrupt
 streaming. Plug the FE directly into a USB 3.0 port (no hub/dock).
 
+For further "device/driver" related debugging, follow instructions on https://github.com/tomojitakasu/PocketSDR.
+
 ## Usage
 
 Configure the device with a standard PocketSDR configuration file: either
