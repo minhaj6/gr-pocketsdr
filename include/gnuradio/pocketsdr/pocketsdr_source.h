@@ -24,7 +24,7 @@ namespace gr {
      *
      * Streams 2-bit (or 3-bit I-only) IF samples from the FE over USB and
      * outputs one gr_complex stream per selected RF channel at the
-     * quantization levels {±1, ±3}. I-only channels output (I + 0j).
+     * quantization levels {+/- 1, +/- 3}. I-only channels output (I + 0j).
      * All output streams are demuxed from the same raw USB stream, so
      * inter-channel sample alignment is preserved.
      *

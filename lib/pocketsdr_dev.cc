@@ -27,7 +27,7 @@ namespace gr {
 namespace pocketsdr {
 
 // USB IDs and vendor requests (PocketSDR src/pocket_sdr.h)
-#define SDR_DEV_VID 0x04B4     // Cypress
+#define SDR_DEV_VID 0x04B4     // Cypress vendor id
 #define SDR_DEV_PID1 0x1004    // EZ-USB FX2LP (FE 2CH)
 #define SDR_DEV_PID2 0x00F1    // EZ-USB FX3 (FE 4CH/8CH)
 #define SDR_DEV_IF 0           // USB interface number
@@ -59,59 +59,85 @@ struct reg_field_t {
     uint32_t val[2];   // value for fixed setting       [CH1, CH2..n]
 };
 
+/* MAX2771 register fields — annotated against ADI MAX2771 datasheet Rev 2 (4/25),
+ * "Register Map" pp.32-44.
+ * Data sheet and detailed registered description in docs/ directory. 
+ *
+ * Registers: 0x0 Configuration 1   0x1 Configuration 2   0x2 Configuration 3
+ *            0x3 PLL Configuration 0x4 PLL Integer Div   0x5 PLL Fractional Div
+ *            0x6 RESERVED          0x7 Clock Config 1    0x8 Test Mode 1
+ *            0x9 Test Mode 2       0xA Clock Config 2
+ *
+ * This default configuration is meant to be replaced by writing a .conf
+ * file. Examples are present in conf/ directory.
+ */
 static const reg_field_t MAX2771_field[] = {
-    {"CHIPEN",          0x0,  1, 31, {1, 1}, {1, 1}},
-    {"IDLE",            0x0,  1, 30, {1, 1}, {0, 0}},
-    {"MIXPOLE",         0x0,  1, 17, {1, 1}, {0, 0}},
-    {"LNAMODE",         0x0,  2, 15, {0, 0}, {0, 1}},
-    {"MIXERMODE",       0x0,  2, 13, {0, 0}, {0, 1}},
-    {"FCEN",            0x0,  7,  6, {0, 0}, {0, 0}},
-    {"FBW",             0x0,  3,  3, {0, 0}, {0, 0}},
-    {"F3OR5",           0x0,  1,  2, {0, 0}, {0, 0}},
-    {"FCENX",           0x0,  1,  1, {0, 0}, {0, 0}},
-    {"FGAIN",           0x0,  1,  0, {0, 0}, {0, 0}},
-    {"ANAIMON",         0x1,  1, 28, {1, 1}, {0, 0}},
-    {"IQEN",            0x1,  1, 27, {0, 0}, {0, 0}},
-    {"GAINREF",         0x1, 12, 15, {0, 0}, {0, 0}},
-    {"SPI_SDIO_CONFIG", 0x1,  2, 13, {1, 1}, {0, 0}},
-    {"AGCMODE",         0x1,  2, 11, {0, 0}, {0, 0}},
-    {"FORMAT",          0x1,  2,  9, {1, 1}, {1, 1}},
-    {"BITS",            0x1,  3,  6, {1, 1}, {2, 2}},
-    {"DRVCFG",          0x1,  2,  4, {1, 1}, {0, 0}},
-    {"DIEID",           0x1,  2,  0, {1, 1}, {0, 0}},
-    {"GAININ",          0x2,  6, 22, {0, 0}, {0, 0}},
-    {"HILODEN",         0x2,  1, 20, {1, 1}, {0, 0}},
-    {"FHIPEN",          0x2,  1, 15, {0, 0}, {1, 1}},
-    {"PGAIEN",          0x2,  1, 13, {0, 0}, {0, 0}},
-    {"PGAQEN",          0x2,  1, 12, {0, 0}, {0, 0}},
-    {"STRMEN",          0x2,  1, 11, {1, 1}, {0, 0}},
-    {"STRMSTART",       0x2,  1, 10, {1, 1}, {0, 0}},
-    {"STRMSTOP",        0x2,  1,  9, {1, 1}, {0, 0}},
-    {"STRMBITS",        0x2,  2,  4, {1, 1}, {1, 1}},
-    {"STAMPEN",         0x2,  1,  3, {1, 1}, {0, 0}},
-    {"TIMESYNCEN",      0x2,  1,  2, {1, 1}, {0, 0}},
-    {"DATASYNCEN",      0x2,  1,  1, {1, 1}, {0, 0}},
-    {"STRMRST",         0x2,  1,  0, {1, 1}, {0, 0}},
-    {"LOBAND",          0x3,  1, 28, {0, 0}, {0, 1}},
-    {"REFOUTEN",        0x3,  1, 24, {1, 1}, {1, 1}},
-    {"IXTAL",           0x3,  2, 19, {1, 1}, {1, 1}},
-    {"ICP",             0x3,  1,  9, {1, 1}, {0, 0}},
-    {"INT_PLL",         0x3,  1,  3, {0, 0}, {0, 0}},
-    {"PWRSAV",          0x3,  1,  2, {1, 1}, {0, 0}},
-    {"NDIV",            0x4, 15, 13, {0, 0}, {0, 0}},
-    {"RDIV",            0x4, 10,  3, {0, 0}, {0, 0}},
-    {"FDIV",            0x5, 20,  8, {0, 0}, {0, 0}},
-    {"EXTADCCLK",       0x7,  1, 28, {1, 1}, {1, 1}},
-    {"PREFRACDIV_SEL",  0xA,  1,  3, {0, 1}, {0, 0}},
-    {"REFCLK_L_CNT",    0x7, 12, 16, {0, 1}, {0, 0}},
-    {"REFCLK_M_CNT",    0x7, 12,  4, {0, 1}, {0, 0}},
-    {"ADCCLK",          0x7,  1,  2, {0, 1}, {0, 0}},
-    {"REFDIV",          0x3,  3, 29, {0, 1}, {0, 0}},
-    {"FCLKIN",          0x7,  1,  3, {0, 1}, {0, 0}},
-    {"ADCCLK_L_CNT",    0xA, 12, 16, {0, 1}, {0, 0}},
-    {"ADCCLK_M_CNT",    0xA, 12,  4, {0, 1}, {0, 0}},
-    {"CLKOUT_SEL",      0xA,  1,  2, {1, 1}, {1, 1}},
-    {"MODE",            0x7,  1,  0, {1, 1}, {0, 0}},
+    /* --- 0x0 Configuration 1: RF + IF path ------------------------------- */
+    {"CHIPEN",          0x0,  1, 31, {1, 1}, {1, 1}},  // 0=all off except SPI bus; forced on
+    {"IDLE",            0x0,  1, 30, {1, 1}, {0, 0}},  // 1=Idle mode (~5mA vs ~26mA); forced off
+    {"MIXPOLE",         0x0,  1, 17, {1, 1}, {0, 0}},  // mixer-output passive pole: 0=13MHz 1=36MHz. SEE NOTE 1
+    {"LNAMODE",         0x0,  2, 15, {0, 0}, {0, 1}},  // 0=high-band(L1) 1=low-band(L2/L5) 2=both off; val dead
+    {"MIXERMODE",       0x0,  2, 13, {0, 0}, {0, 1}},  // 0=high-band 1=low-band 2=both off; track LNAMODE+LOBAND
+    {"FCEN",            0x0,  7,  6, {0, 0}, {0, 0}},  // BPF center, FCENX=1 only: fc=((128-FCEN)/2)*step, keep <=9MHz
+                                                       //   step = 0.195/0.355/0.66 MHz for FBW = 000/010/001
+    {"FBW",             0x0,  3,  3, {0, 0}, {0, 0}},  // 2-sided 3dB BW: 0=2.5 1=8.7 2=4.2 3=23.4* 4=36.0* 7=16.4* (*LP only)
+    {"F3OR5",           0x0,  1,  2, {0, 0}, {0, 0}},  // 0=5th-order Butterworth (steeper) 1=3rd-order (less group delay)
+    {"FCENX",           0x0,  1,  1, {0, 0}, {0, 0}},  // 0=lowpass (zero-IF, FCEN ignored) 1=complex bandpass (low-IF)
+    {"FGAIN",           0x0,  1,  0, {0, 0}, {0, 0}},  // 0=IF filter gain -6dB  1=normal
+
+    /* --- 0x1 Configuration 2: AGC + ADC output --------------------------- */
+    {"ANAIMON",         0x1,  1, 28, {1, 1}, {0, 0}},  // analog I to ANAIPOUT/ANAINOUT; forced off (pins unused on FE)
+    {"IQEN",            0x1,  1, 27, {0, 0}, {0, 0}},  // 0=I only 1=I+Q. must be 1 for complex, and for 3-bit I mode
+    {"GAINREF",         0x1, 12, 15, {0, 0}, {0, 0}},  // AGC setpoint = magnitude-bit density x 512; 170 (=33%) ideal for 2-bit
+    {"SPI_SDIO_CONFIG", 0x1,  2, 13, {1, 1}, {0, 0}},  // SDATA while tri-stated: 0=float 1=pulldn 2=pullup 3=bus-hold
+    {"AGCMODE",         0x1,  2, 11, {0, 0}, {0, 0}},  // 0=independent I/Q AGC  2=manual gain via GAININ  (1,3 reserved)
+    {"FORMAT",          0x1,  2,  9, {1, 1}, {1, 1}},  // 0=unsigned 1=sign/mag 2,3=2's comp. forced 1 <- raw_unpack's LUT assumes this
+    {"BITS",            0x1,  3,  6, {1, 1}, {2, 2}},  // 0=1bit 2=2bits 4=3bits (rest reserved); forced 2
+    {"DRVCFG",          0x1,  2,  4, {1, 1}, {0, 0}},  // 0=CMOS logic  2,3=analog out (ADC bypassed); forced 0
+    {"DIEID",           0x1,  2,  0, {1, 1}, {0, 0}},  // READ-ONLY IC revision; writing it is a no-op. SEE NOTE 3
+
+    /* --- 0x2 Configuration 3: PGA + DSP (serial) interface --------------- */
+    {"GAININ",          0x2,  6, 22, {0, 0}, {0, 0}},  // manual PGA gain, ~1dB/LSB over ~59dB; used only when AGCMODE=2
+    {"HILODEN",         0x2,  1, 20, {1, 1}, {0, 0}},  // datasheet name is HILOADEN: driver high-load mode; off (FX2/FX3 on-board)
+    {"FHIPEN",          0x2,  1, 15, {0, 0}, {1, 1}},  // highpass coupling filter->PGA, kills DC offset; matters in zero-IF. val dead
+    {"PGAIEN",          0x2,  1, 13, {0, 0}, {0, 0}},  // I-channel PGA enable (reset 1)
+    {"PGAQEN",          0x2,  1, 12, {0, 0}, {0, 0}},  // Q-channel PGA enable (reset 0!) -> conf must set this for IQ. SEE NOTE 4
+    /* DSP interface: bit-plane serializer over the 3-wire bus. All forced off —
+     * PocketSDR takes the parallel CMOS pins (I1/I0/Q1/Q0) into the FX2/FX3 GPIF. */
+    {"STRMEN",          0x2,  1, 11, {1, 1}, {0, 0}},  // insert DSP i/f into the signal path
+    {"STRMSTART",       0x2,  1, 10, {1, 1}, {0, 0}},  // rising edge starts stream + clk/data-sync/frame-sync outputs
+    {"STRMSTOP",        0x2,  1,  9, {1, 1}, {0, 0}},  // rising edge stops them
+    {"STRMBITS",        0x2,  2,  4, {1, 1}, {1, 1}},  // 1=I MSB+LSB  3=I+Q MSB+LSB (0,2 reserved); inert while STRMEN=0
+    {"STAMPEN",         0x2,  1,  3, {1, 1}, {0, 0}},  // prepend frame number to each frame
+    {"TIMESYNCEN",      0x2,  1,  2, {1, 1}, {0, 0}},  // TIME_SYNC always vs only while streaming active
+    {"DATASYNCEN",      0x2,  1,  1, {1, 1}, {0, 0}},  // DATASYNC pulse at each 16-bit slice boundary
+    {"STRMRST",         0x2,  1,  0, {1, 1}, {0, 0}},  // reset stream counters
+
+    /* --- 0x3 PLL Configuration ------------------------------------------- */
+    {"LOBAND",          0x3,  1, 28, {0, 0}, {0, 1}},  // 0=L1 (LO 1525-1610MHz) 1=L2/L5 (LO 1160-1290MHz); val dead
+    {"REFOUTEN",        0x3,  1, 24, {1, 1}, {1, 1}},  // CLKOUT buffer; forced on — feeds GPIF clk + other chips' ADC_CLKIN
+    {"IXTAL",           0x3,  2, 19, {1, 1}, {1, 1}},  // XTAL osc/buffer current: 1=normal 3=high (0,2 reserved)
+    {"ICP",             0x3,  1,  9, {1, 1}, {0, 0}},  // charge pump: 0=0.5mA 1=1mA — must match external loop filter
+    {"INT_PLL",         0x3,  1,  3, {0, 0}, {0, 0}},  // 0=fractional-N (NDIV must stay <=251)  1=integer-N
+    {"PWRSAV",          0x3,  1,  2, {1, 1}, {0, 0}},  // PLL power-save; valid only if NDIV%32==0 in integer-N
+
+    /* --- 0x4 / 0x5 PLL dividers ------------------------------------------ */
+    {"NDIV",            0x4, 15, 13, {0, 0}, {0, 0}},  // main divider 36..32767
+    {"RDIV",            0x4, 10,  3, {0, 0}, {0, 0}},  // ref divider 1..1023; keep fCOMP=fx/RDIV in 0.05-32MHz
+    {"FDIV",            0x5, 20,  8, {0, 0}, {0, 0}},  // fractional part; fLO = fx/RDIV*(NDIV + FDIV/2^20), ~+/-30Hz res
+
+    /* --- 0x7 / 0xA clocking ---------------------------------------------- */
+    {"EXTADCCLK",       0x7,  1, 28, {1, 1}, {1, 1}},  // 0=internal 1=from ADC_CLKIN.
+    {"PREFRACDIV_SEL",  0xA,  1,  3, {0, 1}, {0, 0}},  // enable XTAL-path fractional PRE-divider (counters in 0x7!)
+    {"REFCLK_L_CNT",    0x7, 12, 16, {0, 1}, {0, 0}},  // pre-divider L; ratio = L/(4096-M+L), must be <=0.5
+    {"REFCLK_M_CNT",    0x7, 12,  4, {0, 1}, {0, 0}},  // pre-divider M
+    {"ADCCLK",          0x7,  1,  2, {0, 1}, {0, 0}},  // 0=take clk after the /2 /4 x2 x4 block  1=bypass it
+    {"REFDIV",          0x3,  3, 29, {0, 1}, {0, 0}},  // that block: 0=x2 1=/4 2=/2 3=x1 4=x4 == ratio[] in get_info()
+    {"FCLKIN",          0x7,  1,  3, {0, 1}, {0, 0}},  // enable ADC-path fractional divider (counters in 0xA!)
+    {"ADCCLK_L_CNT",    0xA, 12, 16, {0, 1}, {0, 0}},  // ADC-path L; same L/(4096-M+L) form, <=0.5
+    {"ADCCLK_M_CNT",    0xA, 12,  4, {0, 1}, {0, 0}},  // ADC-path M
+    {"CLKOUT_SEL",      0xA,  1,  2, {1, 1}, {1, 1}},  // 0=integer div/mult output  1=ADC clock; forced 1
+    {"MODE",            0x7,  1,  0, {1, 1}, {0, 0}},  // DSP-interface mode select; no decode published. forced 0
     {"", 0, 0, 0, {0, 0}, {0, 0}}
 };
 
@@ -128,6 +154,7 @@ static uint32_t bit_mask(const reg_field_t* reg)
 // ---------------------------------------------------------------------------
 // open / close (from sdr_usb_open / sdr_usb_close / sdr_dev_open)
 
+// open
 fe_device::fe_device(int bus, int port)
 {
     const uint16_t vid[] = {SDR_DEV_VID, SDR_DEV_VID};
@@ -177,6 +204,7 @@ fe_device::fe_device(int bus, int port)
     d_buff = new uint8_t[BUFF_SIZE];
 }
 
+// close
 fe_device::~fe_device()
 {
     if (d_state) stop();
