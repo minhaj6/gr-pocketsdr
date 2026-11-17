@@ -14,7 +14,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
 /* BINDTOOL_HEADER_FILE(pocketsdr_source.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(67ab2f0ba1ff388917cfa61e4f62f981)                     */
+/* BINDTOOL_HEADER_FILE_HASH(8dd7a9817379675bd88c8d62da0bea8d)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
