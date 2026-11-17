@@ -29,7 +29,15 @@ cmake -DCMAKE_INSTALL_PREFIX=<prefix> ..   # omit prefix for /usr/local
 make -j$(nproc)
 ctest                # bit-exact unpack regression test (no hardware needed)
 make install         # may need sudo for system prefixes
+sudo ldconfig        # system prefixes only, see below
 ```
+
+For a system prefix such as the default `/usr/local`, run `sudo ldconfig` after
+the first install. Linux finds shared libraries through a cache
+(`/etc/ld.so.cache`), and `make install` does not update it. Without this step,
+`from gnuradio import pocketsdr` fails with
+`ImportError: libgnuradio-pocketsdr.so.1.0.0: cannot open shared object file`.
+Reinstalling the same version later does not need it again.
 
 For a non-system prefix, make sure the environment can find the module:
 
